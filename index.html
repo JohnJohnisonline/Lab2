@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Intro to Leaflet</title>
+	<!-- the Leaflet CSS -->
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+	<!-- the Leaflet JavaScript library -->
+	<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+  <!-- This is an earthqauke geojson -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+	<!--CSS styles-->
+	<style>
+	body {
+font-family: sans-serif;
+max-width: 900px;
+margin: auto;
+}
+	</style>
+
+</head>
+
+<body>
+	<h1>Earthquakes that have occurred in the past 24 hours</h1>
+
+	<!-- code where we create and name the container that holds the map -->
+		<div id="map" style="height: 80vh"></div>
+
+			<p>This map depicts all earthquakes that have occurred in the past 24 hours. Data comes from the <a href="https://earthquake.usgs.gov/earthquakes/feed/v1.0/geojson.php">USGS Live Earthquake Feed</a> and is updated every minute. Additionally, the map shows active faults using data from the <a href = "https://github.com/cossatot/gem-global-active-faults">GEM Foundation's Global Active Faults Database</a>. Click on an earthquake to find out more information about the event.</p>
+			<p>The Pacific Northwest lies along the Cascadia fault. Tectonic activity along this fault could cause a catastrophic earthquake that would produce major damage throughout our region. Learn about how researchers at the University of Washington are modelling earthquake risk and preparing for disaster response at the <a href="https://hazards.uw.edu/geology/m9/">M9 Project</a>.</p>
+	<!-- link that loads the fault line data from an external file -->
+	<script type="text/javascript" src="data/faults.js"></script>
+
+	<!-- code where we build the map and its functionality -->
+	<script>
+		var mymap = L.map('map').setView([0, 0], 2);
+		var basemap = L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/terrain/{z}/{x}/{y}{r}.png', {
+			attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+		}).addTo(mymap);
+
+    // load earthquake GeoJSON from an external file and add it to the map as a layer
+		$.getJSON("https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson",function(data){
+		    L.geoJson(data, {
+		        pointToLayer: function(feature, latlng){
+		            var marker = L.marker(latlng);
+								marker.bindPopup("Location: " + feature.properties.place + "<br>Magnitude: " + feature.properties.mag + "<br><a href =" + feature.properties.url + "target = '_blank'>More info</a>");
+
+		            return marker;
+		        }
+		    }).addTo(mymap);
+});
+// add the fault line data to the map as a layer
+				L.geoJson(faults, {
+					interactive: false
+				}).addTo(mymap);
+	</script>
+</body>
+</html>
